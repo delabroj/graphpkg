@@ -24,10 +24,13 @@ import (
 )
 
 var (
-	pkgs     = make(map[string][]string)
-	matchvar = flag.String("match", ".*", "filter packages")
-	stdout   = flag.Bool("stdout", false, "print to standard output instead of browser")
-	pkgmatch *regexp.Regexp
+	pkgs        = make(map[string][]string)
+	matchvar    = flag.String("match", ".*", "filter packages")
+	parentmatch = flag.String("parent-match", ".*", "only show dependencies of packages that match regex")
+	vendorpath  = flag.String("vendor", "vendor", "location of vendor folder")
+	stdout      = flag.Bool("stdout", false, "print to standard output instead of browser")
+	pkgmatch    *regexp.Regexp
+	prntmatch   *regexp.Regexp
 )
 
 func findImport(p string) {
@@ -47,10 +50,14 @@ func findImport(p string) {
 		p = path.Join("vendor", p)
 	}
 
-	pkg, err := build.Import(p, "", 0)
+	pkg, err := build.Import(path.Join(*vendorpath, p), "", 0)
 	if err != nil {
-		log.Fatal(err)
+		pkg, err = build.Import(p, "", 0)
+		if err != nil {
+			log.Println(err)
+		}
 	}
+
 	pkgs[p] = filter(pkg.Imports)
 	for _, pkg := range pkgs[p] {
 		findImport(pkg)
@@ -90,9 +97,18 @@ func keys() map[string]int {
 	return m
 }
 
+func filterParent() {
+	for k, _ := range pkgs {
+		if !prntmatch.MatchString(k) {
+			delete(pkgs, k)
+		}
+	}
+}
+
 func init() {
 	flag.Parse()
 	pkgmatch = regexp.MustCompile(*matchvar)
+	prntmatch = regexp.MustCompile(*parentmatch)
 }
 
 func check(err error) {
@@ -105,6 +121,7 @@ func main() {
 	for _, pkg := range flag.Args() {
 		findImport(pkg)
 	}
+	filterParent()
 	cmd := exec.Command("dot", "-Tsvg")
 	in, err := cmd.StdinPipe()
 	check(err)
