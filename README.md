@@ -28,6 +28,12 @@ Look for packages in the indicated vendor folder first:
 
 	graphpkg -vendor 'launchpad.net/goamz/s3/vendor' launchpad.net/goamz/s3
 
+# Prefix-trim
+
+Remove the given string from the beginning of package names before graphing.
+
+	graphpkg -prefix-trim 'launchpad.net/goamz' launchpad.net/goamz/s3
+
 # Output
 
 By default graphpkg shows the graph in your browser, you can choose to print the resulting svg to standard output:

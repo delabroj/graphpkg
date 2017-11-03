@@ -28,6 +28,7 @@ var (
 	matchvar    = flag.String("match", ".*", "filter packages")
 	parentmatch = flag.String("parent-match", ".*", "only show dependencies of packages that match regex")
 	vendorpath  = flag.String("vendor", "vendor", "location of vendor folder")
+	prefix      = flag.String("prefix-trim", "", "prefix to remove from packages")
 	stdout      = flag.Bool("stdout", false, "print to standard output instead of browser")
 	pkgmatch    *regexp.Regexp
 	prntmatch   *regexp.Regexp
@@ -132,7 +133,7 @@ func main() {
 	fmt.Fprintf(in, "digraph {\n")
 	keys := keys()
 	for p, i := range keys {
-		fmt.Fprintf(in, "\tN%d [label=%q,shape=box];\n", i, p)
+		fmt.Fprintf(in, "\tN%d [label=%q,shape=box];\n", i, strings.Replace(p, *prefix, "", -1))
 	}
 	for k, v := range pkgs {
 		for _, p := range v {
