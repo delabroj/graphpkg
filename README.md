@@ -2,7 +2,7 @@
 
 First install [graphviz](http://graphviz.org/Download.php) for your OS, then
 
-	go get github.com/davecheney/graphpkg
+	go get github.com/delabroj/graphpkg
 
 # Usage
 
